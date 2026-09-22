@@ -1,0 +1,5 @@
+AgroStock — Farm Supply & Inventory Management Platform
+Java, Spring Boot, REST APIs, MongoDB Atlas, Spring Security, JWT, Redis, React, Docker
+• Built a full-stack farm-supply platform for product catalog, inventory, buyer checkout, and admin operations using Java Spring Boot and React.
+• Implemented JWT authentication, role-based authorization, MongoDB Atlas persistence, transactional order workflows, and guarded atomic inventory updates to prevent stock inconsistencies.
+• Added Redis caching with cache eviction, pagination, filtering, sorting, validation, centralized exception handling, Docker, and Swagger/OpenAPI documentation.
