@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .map(String::trim)
                 .filter(value -> !value.isBlank())
                 .toList());
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
