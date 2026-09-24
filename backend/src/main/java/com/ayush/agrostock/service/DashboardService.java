@@ -8,12 +8,11 @@ import com.ayush.agrostock.repository.ProductRepository;
 import org.bson.Document;
 import org.bson.types.Decimal128;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -59,40 +58,46 @@ public class DashboardService {
     }
 
     private BigDecimal calculateRevenue() {
-        Aggregation aggregation = Aggregation.newAggregation(
-                Aggregation.match(
-                        Criteria.where("status").ne("CANCELLED")
-                ),
-                Aggregation.group()
-                        .sum("total")
-                        .as("revenue")
+        List<Document> pipeline = List.of(
+                new Document("$match",
+                        new Document("status",
+                                new Document("$ne", "CANCELLED"))),
+
+                new Document("$group",
+                        new Document("_id", null)
+                                .append("revenue",
+                                        new Document("$sum",
+                                                new Document("$toDecimal", "$total"))))
         );
 
-        Document result = mongoTemplate.aggregate(
-                aggregation,
-                "orders",
-                Document.class
-        ).getUniqueMappedResult();
+        Document result = mongoTemplate
+                .getCollection("orders")
+                .aggregate(pipeline)
+                .first();
 
         if (result == null) {
             return BigDecimal.ZERO;
         }
 
-        Object rawRevenue = result.get("revenue");
+        Object revenue = result.get("revenue");
 
-        if (rawRevenue instanceof Decimal128 decimal128) {
+        if (revenue instanceof Decimal128 decimal128) {
             return decimal128.bigDecimalValue();
         }
 
-        if (rawRevenue instanceof BigDecimal bigDecimal) {
+        if (revenue instanceof BigDecimal bigDecimal) {
             return bigDecimal;
         }
 
-        if (rawRevenue != null) {
+        if (revenue instanceof Number number) {
+            return BigDecimal.valueOf(number.doubleValue());
+        }
+
+        if (revenue != null) {
             try {
-                return new BigDecimal(rawRevenue.toString());
+                return new BigDecimal(revenue.toString());
             } catch (NumberFormatException ignored) {
-                // Fall through to zero if Mongo returns an unexpected type.
+                // Return zero for unexpected MongoDB value types.
             }
         }
 
