@@ -6,7 +6,7 @@ import com.ayush.agrostock.exception.ResourceNotFoundException;
 import com.ayush.agrostock.model.Product;
 import com.ayush.agrostock.repository.ProductRepository;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ public class ProductService {
         return productRepository.search(query, category, active, pageable).map(this::toResponse);
     }
 
-    @Cacheable(cacheNames = "products", key = "#id")
+
     public ProductDtos.ProductResponse getById(String id) {
         return toResponse(productRepository.findById(id)
                 .filter(Product::isActive)
